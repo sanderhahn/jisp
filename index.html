@@ -38,7 +38,7 @@ $(function() {
     try {
       console_print(print(eval(read(src), initial_environment)))
     } catch(e) {
-      console_print("Error: " + e);
+      console_print(e);
     }
   })
   
