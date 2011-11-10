@@ -361,7 +361,7 @@ case 10:return 15;
 break;
 }
 };
-lexer.rules = [/^;[^\n]*[\n]/,/^[\s]+/,/^[0-9]+(\.[0-9]+)?\b\b/,/^\./,/^[a-zA-Z/_=\+\-\*:%.]+/,/^\(/,/^\)/,/^'/,/^#t\b/,/^#f\b/,/^$/];
+lexer.rules = [/^;[^\n]*[\n]/,/^[\s]+/,/^[0-9]+(\.[0-9]+)?\b\b/,/^\./,/^[a-zA-Z/_=\+\-\*\?:%.]+/,/^\(/,/^\)/,/^'/,/^#t\b/,/^#f\b/,/^$/];
 lexer.conditions = {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10],"inclusive":true}};return lexer;})()
 parser.lexer = lexer;
 return parser;

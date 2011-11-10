@@ -56,6 +56,11 @@ function print(value) {
 		
 		var str = ''
 		var here = value
+		
+		if(value !== NIL && is_eq(car(value), 'quote')) {
+			return "'" + print(car(cdr(value)))
+		}
+		
 		do {
 			if(here === NIL) {
 				return '(' + str + ')'

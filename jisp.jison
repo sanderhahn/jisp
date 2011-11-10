@@ -1,19 +1,19 @@
-/* Simple Lisp */
+/* Simple Lisp Grammar */
 
 %lex
 
 %%
-';'[^\n]*[\n]         /* comment */;
-[\s]+                 /* whitespace */;
-[0-9]+("."[0-9]+)?\b  return 'NUMBER';
-'.'                   return '.';
-[a-zA-Z/_=\+\-\*:%.]+ return 'SYMBOL';
-'('                   return '(';
-')'                   return ')';
-"'"                   return "'";
-'#t'                  return '#t';
-'#f'                  return '#f';
-<<EOF>>               return 'EOF';
+';'[^\n]*[\n]             /* comment */;
+[\s]+                     /* whitespace */;
+[0-9]+("."[0-9]+)?\b      return 'NUMBER';
+'.'                       return '.';
+[a-zA-Z/_=\+\-\*\?:%.]+   return 'SYMBOL';
+'('                       return '(';
+')'                       return ')';
+"'"                       return "'";
+'#t'                      return '#t';
+'#f'                      return '#f';
+<<EOF>>                   return 'EOF';
 
 /lex
 
