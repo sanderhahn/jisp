@@ -165,7 +165,7 @@ var initial_environment = map2dict({
 	'car': car,
 	'cdr': cdr,
 	
-	// nummeric
+	// numeric
 	'+': function(a, b) { return a + b },
 	'-': function(a, b) { return a - b },
 	'*': function(a, b) { return a * b },
