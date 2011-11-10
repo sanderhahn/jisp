@@ -102,11 +102,6 @@ function eval(code, env) {
 			return code
 		}
 		
-		var init_entry = lookup(env, code)
-		if(init_entry != NIL) {
-			return cdr(init_entry)
-		}
-
 		var entry = lookup(env, code)
 		if(entry != NIL) {
 			return cdr(entry)
@@ -135,7 +130,7 @@ function eval(code, env) {
 		}
 		
 		if(fun.length != args.length) {
-			throw 'Call made function with arity: ' + fun.length + ' got ' + args.length + ' values'
+			throw 'Call made to a function with arity: ' + fun.length + ' got ' + args.length + ' values'
 		}
 
 		return fun.apply(this, args)
