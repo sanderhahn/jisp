@@ -6,9 +6,9 @@
 ';'[^\n]*[\n]         /* comment */;
 [\s]+                 /* whitespace */;
 [0-9]+("."[0-9]+)?\b  return 'NUMBER';
-[a-zA-Z/_=\+\-\*]+    return 'SYMBOL';
-'('                   return '(';
 '.'                   return '.';
+[a-zA-Z/_=\+\-\*:%.]+ return 'SYMBOL';
+'('                   return '(';
 ')'                   return ')';
 "'"                   return "'";
 '#t'                  return '#t';
@@ -37,7 +37,7 @@ list
 sexpr
   : atom         { $$ = $1 }
   | '(' list ')' { $$ = $2 }
-  | "'" sexpr    { $$ = cons('quote', $2) }
+  | "'" sexpr    { $$ = cons('quote', cons($2, NIL)) }
   ;
 
 jisp

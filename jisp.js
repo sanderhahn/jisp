@@ -27,7 +27,7 @@ case 8: this.$ = $$[$0]
 break;
 case 9: this.$ = $$[$0-1] 
 break;
-case 10: this.$ = cons('quote', $$[$0]) 
+case 10: this.$ = cons('quote', cons($$[$0], NIL)) 
 break;
 case 11: return $$[$0-1] 
 break;
@@ -343,11 +343,11 @@ case 1:/* whitespace */;
 break;
 case 2:return 4;
 break;
-case 3:return 5;
+case 3:return 10;
 break;
-case 4:return 11;
+case 4:return 5;
 break;
-case 5:return 10;
+case 5:return 11;
 break;
 case 6:return 12;
 break;
@@ -361,7 +361,7 @@ case 10:return 15;
 break;
 }
 };
-lexer.rules = [/^;[^\n]*[\n]/,/^[\s]+/,/^[0-9]+(\.[0-9]+)?\b\b/,/^[a-zA-Z/_=\+\-\*]+/,/^\(/,/^\./,/^\)/,/^'/,/^#t\b/,/^#f\b/,/^$/];
+lexer.rules = [/^;[^\n]*[\n]/,/^[\s]+/,/^[0-9]+(\.[0-9]+)?\b\b/,/^\./,/^[a-zA-Z/_=\+\-\*:%.]+/,/^\(/,/^\)/,/^'/,/^#t\b/,/^#f\b/,/^$/];
 lexer.conditions = {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10],"inclusive":true}};return lexer;})()
 parser.lexer = lexer;
 return parser;
