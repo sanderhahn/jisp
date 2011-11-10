@@ -35,7 +35,11 @@ $(function() {
   
   $('#run').click(function() {
     var src = $('.source').val();
-    console_print(print(eval(read(src), initial_environment)))
+    try {
+      console_print(print(eval(read(src), initial_environment)))
+    } catch(e) {
+      console_print("Error: " + e);
+    }
   })
   
 })
