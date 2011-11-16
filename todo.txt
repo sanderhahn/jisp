@@ -1,0 +1,7 @@
+eval atom, list
+
+lookup
+def
+let
+set
+

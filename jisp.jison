@@ -7,12 +7,16 @@
 [\s]+                     /* whitespace */;
 [0-9]+("."[0-9]+)?\b      return 'NUMBER';
 '.'                       return '.';
-[a-zA-Z/_=\+\-\*\?:%.]+   return 'SYMBOL';
+[a-zA-Z/_=\+\-\*\?:%.!]+  return 'SYMBOL';
 '('                       return '(';
 ')'                       return ')';
 "'"                       return "'";
-'#t'                      return '#t';
-'#f'                      return '#f';
+",@"                      return ",@";
+","                       return ",";
+"`"                       return "`";
+'#true'                   return '#true';
+'#false'                  return '#false';
+'#null'                   return '#null';
 <<EOF>>                   return 'EOF';
 
 /lex
@@ -22,22 +26,26 @@
 %%
 
 atom
-  : NUMBER { $$ = Number(yytext) }
-  | SYMBOL { $$ = yytext }
-  | '#t'   { $$ = true }
-  | '#f'   { $$ = false }
+  : NUMBER   { $$ = Number(yytext) }
+  | SYMBOL   { $$ = yytext }
+  | '#true'  { $$ = true }
+  | '#false' { $$ = false }
+  | '#null'  { $$ = null }
   ;
 
 list
   : sexpr list      { $$ = cons( $1, $2 ) }
   | sexpr '.' sexpr { $$ = cons( $1, $3 ) }
-  |                 { $$ = NIL }
+  |                 { $$ = null }
   ;
 
 sexpr
   : atom         { $$ = $1 }
   | '(' list ')' { $$ = $2 }
-  | "'" sexpr    { $$ = cons('quote', cons($2, NIL)) }
+  | "'" sexpr    { $$ = cons('quote', cons($2, null)) }
+  | ",@" sexpr   { $$ = cons('unquote-splicing', cons($2, null)) }
+  | "," sexpr    { $$ = cons('unquote', cons($2, null)) }
+  | "`" sexpr    { $$ = cons('quasiquote', cons($2, null)) }
   ;
 
 jisp

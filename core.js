@@ -1,7 +1,5 @@
 // primitives
 
-var NIL = null
-
 function is_atom(atom) {
 	return typeof(atom) != 'object'
 }
@@ -28,6 +26,18 @@ function cdr(p) {
 	return p[1]
 }
 
+function length(p) {
+	var len = 0
+	while(p != null) {
+		if(is_atom(p)) {
+			return null
+		}
+		len++
+		p = cdr(p)
+	}
+	return len
+}
+
 // control flow
 
 function cond() {}
@@ -45,9 +55,9 @@ function print(value) {
 	if(is_atom(value)) {
 		
 		if(value === true) {
-			return '#t'
+			return '#true'
 		} else if(value === false) {
-			return '#f'
+			return '#false'
 		} else {
 			return value
 		}
@@ -57,12 +67,12 @@ function print(value) {
 		var str = ''
 		var here = value
 		
-		if(value !== NIL && is_eq(car(value), 'quote')) {
+		if(value !== null && is_eq(car(value), 'quote')) {
 			return "'" + print(car(cdr(value)))
 		}
 		
 		do {
-			if(here === NIL) {
+			if(here === null) {
 				return '(' + str + ')'
 			}
 			if(str != '') {
@@ -83,14 +93,14 @@ function print(value) {
 // lookup (looks up a symbol in a list of key value pairs returns the pair)
 
 function lookup(env, symbol) {
-	while(env != NIL) {
+	while(env != null) {
 		var entry = car(env)
-		if(is_eq(car(entry), symbol)) {
+		if(car(entry) === symbol) {
 			return entry
 		}
 		env = cdr(env)
 	}
-	return NIL
+	return null
 }
 
 function extend(env, symbol, value) {
@@ -108,22 +118,100 @@ function eval(code, env) {
 		}
 		
 		var entry = lookup(env, code)
-		if(entry != NIL) {
+		if(entry != null) {
 			return cdr(entry)
 		}
 		
-		throw 'Undefined symbol: ' + code
+		var entry = lookup(global_environment, code)
+		if(entry != null) {
+			return cdr(entry)
+		}
+
+		throw code + ': symbol undefined'
 		
 	} else {
 		
+		if(code === null) {
+			return null
+		}
+
 		var syntax = car(code)
+		var rest = cdr(code)
 		
-		if(is_eq(syntax, 'quote')) {
-			return car(cdr(code))
+		switch(syntax) {
+			
+			// quoting in r6rs
+			// quote('), unquote(,), quasiquote(`), unquote-splicing(,@)
+			
+			case 'quote':
+				return car(rest)
+			
+			case 'unquote':
+				throw 'unquote: not in quasiquote'
+				
+			case 'unquote-splicing':
+				throw 'unquote-splicing: not in quasiquote'
+			
+			case 'quasiquote':
+				return quasiquote(car(rest))
+				
+			case 'quote':
+				return car(rest)
+				
+			case 'let':
+			
+				// local variable
+				
+				if(length(rest) !== 3) {
+					throw 'let: syntax requires three elements: a symbol and a value and an expression'
+				}
+
+				var symbol = car(rest)
+				var code = car(cdr(rest))
+				var expr = car(cdr(cdr(rest)))
+				var val = eval(code)
+				
+				env = extend(env, symbol, val)
+
+				return eval(expr, env)
+			
+			case 'def':
+
+				// global variable
+				
+				if(length(rest) !== 2) {
+					throw 'def: syntax requires two elements: a symbol and a value'
+				}
+
+				var symbol = car(rest)
+				var code = car(cdr(rest))
+				var val = eval(code)
+				global_environment = extend(global_environment, symbol, val)
+
+				return val
+
+			case 'set!':
+				
+				if(length(rest) !== 2) {
+					throw 'set!: syntax requires two elements: a symbol and a value'
+				}
+				
+				var symbol = car(rest)
+				var code = car(cdr(rest))
+				
+				var entry = lookup(env, symbol)
+				if(entry === null) {
+					throw symbol + ': undefined symbol'
+				}
+				
+				var val = eval(code)
+				entry[1] = val
+				
+				return val
 		}
 		
 		var args = []
-		while(code != NIL) {
+		while(code != null) {
 			args.push(eval(car(code), env))
 			code = cdr(code)
 		}
@@ -143,10 +231,32 @@ function eval(code, env) {
 	}
 }
 
+// Multiple nestings of quasiquote require multiple nestings of unquote or unquote-splicing to escape.
+
+function quasiquote(p) {
+	
+	if(is_atom(p)) {
+		
+		return p
+		
+	} else {
+
+		if(p === null) {
+			return null
+		}
+
+		// lets first implement apply and map ?
+
+		return p
+		
+	}
+	
+}
+
 // map to dict (convert object into a list of key value pairs)
 
 function map2dict(map) {
-	var dict = NIL
+	var dict = null
 	for(var key in map) {
 		dict = extend(dict, key, map[key])
 	}
@@ -156,16 +266,20 @@ function map2dict(map) {
 var initial_environment = map2dict({
 	
 	// primitives
+
 	'atom?': is_atom,
 	'eq?': is_eq,
 	'symbol?': is_symbol,
 	
 	// list
+	
 	'cons': cons,
 	'car': car,
 	'cdr': cdr,
+	'length': length,
 	
 	// numeric
+
 	'+': function(a, b) { return a + b },
 	'-': function(a, b) { return a - b },
 	'*': function(a, b) { return a * b },
@@ -174,7 +288,16 @@ var initial_environment = map2dict({
 	
 	// util
 	
-	'print': print
-
+	'print': print,
+	'read': read,	// implement string literals
+	'eval': eval,
+	
 })
 
+var global_environment = map2dict({
+
+	// test
+
+	'a': 10,
+
+})
