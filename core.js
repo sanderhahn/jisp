@@ -1,7 +1,27 @@
+function Symbol(symbol) {
+	this.symbol = symbol
+	return this
+}
+
+Symbol.prototype.toString = function() {
+	return this.symbol
+}
+
+Symbol.prototype.equals = function(b) {
+	if(is_symbol(b)) {
+		return this.symbol === b.symbol
+	}
+	return false
+}
+
 // primitives
 
 function is_atom(atom) {
-	return typeof(atom) != 'object'
+	if(atom === null) {
+		return true
+	}
+	return atom.constructor !== Array
+//	return typeof(atom) != 'object'
 }
 
 function is_eq(a, b) {
@@ -9,7 +29,11 @@ function is_eq(a, b) {
 }
 
 function is_symbol(atom) {
-	return typeof(atom) == 'string'
+	if(atom === null) {
+		return false
+	}
+	return atom.constructor === Symbol
+//	return typeof(atom) == 'string'
 }
 
 // lists
@@ -52,12 +76,20 @@ function read(str) {
 
 function print(value) {
 	
+	if(value === undefined) {
+		return
+	}
+	
 	if(is_atom(value)) {
 		
-		if(value === true) {
+		if(value === null) {
+			return '()'
+		}	else if(value === true) {
 			return '#true'
 		} else if(value === false) {
 			return '#false'
+		} else if(typeof(value) === 'string') {
+			return JSON.stringify(value)
 		} else {
 			return value
 		}
@@ -72,15 +104,17 @@ function print(value) {
 		}
 		
 		do {
-			if(here === null) {
-				return '(' + str + ')'
-			}
+			// if(here === null) {
+			// 	return '(' + str + ')'
+			// }
 			if(str != '') {
 				str += ' '
 			}
 			str += print(car(here))
 			var more = cdr(here)
-			if(is_atom(more)) {
+			if(more === null) {
+				return '(' + str + ')'
+			} else if (is_atom(more)) {
 				return '(' + str + ' . ' + print(more) + ')'
 			} else {
 				here = more
@@ -95,7 +129,7 @@ function print(value) {
 function lookup(env, symbol) {
 	while(env != null) {
 		var entry = car(env)
-		if(car(entry) === symbol) {
+		if(symbol.equals(car(entry))) {
 			return entry
 		}
 		env = cdr(env)
@@ -258,7 +292,7 @@ function quasiquote(p) {
 function map2dict(map) {
 	var dict = null
 	for(var key in map) {
-		dict = extend(dict, key, map[key])
+		dict = extend(dict, new Symbol(key), map[key])
 	}
 	return dict
 }
@@ -291,6 +325,10 @@ var initial_environment = map2dict({
 	'print': print,
 	'read': read,	// implement string literals
 	'eval': eval,
+
+	// not sure if display escapes strings or not (not inside quotes?)
+
+	'display': function(v) { console_print(v) },
 	
 })
 

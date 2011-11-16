@@ -19,8 +19,9 @@ assert(eval(null) === null)
 // test lookup
 
 assert(lookup(null, 'a') === null, 'empty lookup')
-assert(cdr(lookup(read('((b . 10) (a . 5))'), 'a')) === 5, 'lookup a')
+assert(cdr(lookup(read('((b . 10) (a . 5))'), read('a'))) === 5, 'lookup a')
 
+/*
 // length
 
 assert(length(read('1')) === null)
@@ -37,3 +38,9 @@ assert(eval(read('(let a 5 (let b 7 (* a b)))'), initial_environment) === 35, 'l
 // assert(eval(read('(quasiquote (0 (unquote-splicing 1) 4))')), 'unquote-splicing syntax error')
 
 // error: unquote-splicing: expected argument of type <proper list>; given 1
+
+// syntax
+
+assert(print(read('(#\'1 #`2 #,3 #,@4)')) === '((syntax 1) (quasisyntax 2) (unsyntax 3) (unsyntax-splicing 4))', 'syntax parse error')
+
+*/

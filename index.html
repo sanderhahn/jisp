@@ -25,18 +25,23 @@
 <script src="jisp.js"></script>
 <script src="asserts.js"></script>
 <script>
+var console_print
+
 $(function() {
 
   var console = $('.console')
 
-  function console_print(str) {
+  console_print = function(str) {
     console.val(console.val() + str + "\n")
   }
   
   $('#run').click(function() {
     var src = $('.source').val();
     try {
-      console_print(print(eval(read(src), initial_environment)))
+      var value = eval(read(src), initial_environment)
+      if(value !== undefined) {
+        console_print(print(value))
+      }
     } catch(e) {
       console_print(e);
     }
