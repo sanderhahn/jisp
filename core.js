@@ -145,6 +145,10 @@ function extend(env, symbol, value) {
 
 function eval(code, env) {
 	
+	if(env === null) {
+		env = initial_environment
+	}
+	
 	if(is_atom(code)) {
 		
 		if(! is_symbol(code)) {
@@ -172,76 +176,80 @@ function eval(code, env) {
 		var syntax = car(code)
 		var rest = cdr(code)
 		
-		switch(syntax) {
+		if(is_symbol(syntax)) {
+			switch(syntax.symbol) {
 			
-			// quoting in r6rs
-			// quote('), unquote(,), quasiquote(`), unquote-splicing(,@)
+				// quoting in r6rs
+				// quote('), unquote(,), quasiquote(`), unquote-splicing(,@)
 			
-			case 'quote':
-				return car(rest)
+				case 'quote':
+					return car(rest)
 			
-			case 'unquote':
-				throw 'unquote: not in quasiquote'
+				case 'unquote':
+					throw 'unquote: not in quasiquote'
 				
-			case 'unquote-splicing':
-				throw 'unquote-splicing: not in quasiquote'
+				case 'unquote-splicing':
+					throw 'unquote-splicing: not in quasiquote'
 			
-			case 'quasiquote':
-				return quasiquote(car(rest))
+				case 'quasiquote':
+					return quasiquote(car(rest))
 				
-			case 'quote':
-				return car(rest)
+				case 'let':
+
+					// local variable
 				
-			case 'let':
+					if(length(rest) !== 3) {
+						throw 'let: syntax requires three elements: a symbol and a value and an expression'
+					}
+
+					var symbol = car(rest)
+					var code = car(cdr(rest))
+					var expr = car(cdr(cdr(rest)))
+					var val = eval(code)
+				
+					env = extend(env, symbol, val)
+
+					return eval(expr, env)
 			
-				// local variable
-				
-				if(length(rest) !== 3) {
-					throw 'let: syntax requires three elements: a symbol and a value and an expression'
-				}
+				case 'def':
 
-				var symbol = car(rest)
-				var code = car(cdr(rest))
-				var expr = car(cdr(cdr(rest)))
-				var val = eval(code)
+					// global variable
 				
-				env = extend(env, symbol, val)
+					if(length(rest) !== 2) {
+						throw 'def: syntax requires two elements: a symbol and a value'
+					}
 
-				return eval(expr, env)
-			
-			case 'def':
+					var symbol = car(rest)
+					var code = car(cdr(rest))
+					var val = eval(code)
+					global_environment = extend(global_environment, symbol, val)
 
-				// global variable
-				
-				if(length(rest) !== 2) {
-					throw 'def: syntax requires two elements: a symbol and a value'
-				}
+					return val
 
-				var symbol = car(rest)
-				var code = car(cdr(rest))
-				var val = eval(code)
-				global_environment = extend(global_environment, symbol, val)
-
-				return val
-
-			case 'set!':
+				case 'set!':
 				
-				if(length(rest) !== 2) {
-					throw 'set!: syntax requires two elements: a symbol and a value'
-				}
+					if(length(rest) !== 2) {
+						throw 'set!: syntax requires two elements: a symbol and a value'
+					}
 				
-				var symbol = car(rest)
-				var code = car(cdr(rest))
+					var symbol = car(rest)
+					var code = car(cdr(rest))
 				
-				var entry = lookup(env, symbol)
-				if(entry === null) {
-					throw symbol + ': undefined symbol'
-				}
+					var entry = lookup(env, symbol)
+					if(entry === null) {
+						
+						entry = lookup(global_environment, symbol)
+						if(entry === null) {
+							throw symbol + ': undefined symbol'
+						}
+						
+					}
 				
-				var val = eval(code)
-				entry[1] = val
+					var val = eval(code)
+					entry[1] = val
 				
-				return val
+					return val
+			}
 		}
 		
 		var args = []
@@ -253,11 +261,11 @@ function eval(code, env) {
 		var fun = args.shift()
 		
 		if(typeof(fun) != 'function') {
-			throw 'Call made to a non-function value: ' + print(fun)
+			throw 'value: is not a function ' + print(fun)
 		}
 		
 		if(fun.length != args.length) {
-			throw 'Call made to a function with arity: ' + fun.length + ' got ' + args.length + ' values'
+			throw 'function: call made to a function with arity: ' + fun.length + ' got ' + args.length + ' values'
 		}
 
 		return fun.apply(this, args)

@@ -21,7 +21,6 @@ assert(eval(null) === null)
 assert(lookup(null, 'a') === null, 'empty lookup')
 assert(cdr(lookup(read('((b . 10) (a . 5))'), read('a'))) === 5, 'lookup a')
 
-/*
 // length
 
 assert(length(read('1')) === null)
@@ -29,7 +28,7 @@ assert(length(read('(1 2 3)')) === 3)
 
 // local variables
 
-assert(eval(read('(let a 5 (let b 7 (* a b)))'), initial_environment) === 35, 'local vars')
+assert(eval(read('(let a 5 (let b 7 (* a b)))')) === 35, 'local vars')
 
 // quasiquoting
 
@@ -43,4 +42,3 @@ assert(eval(read('(let a 5 (let b 7 (* a b)))'), initial_environment) === 35, 'l
 
 assert(print(read('(#\'1 #`2 #,3 #,@4)')) === '((syntax 1) (quasisyntax 2) (unsyntax 3) (unsyntax-splicing 4))', 'syntax parse error')
 
-*/
